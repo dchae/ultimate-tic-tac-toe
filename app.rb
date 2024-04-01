@@ -19,9 +19,7 @@ end
 before do
   session[:messages] ||= []
   @db = DatabaseHandler.new(logger)
-  session[:board] ||= Board.new
-  session[:human] ||= Player.new('X', 'Player')
-  session[:computer] ||= Player.new('O', 'Computer')
+  session[:game] ||= TTTGame.new('Player')
 end
 
 helpers do
@@ -35,46 +33,36 @@ get '/' do
 end
 
 get '/play' do
-  @board = session[:board]
+  @game = session[:game]
+  @board = @game.board
   erb :play
 end
 
 post '/play' do
   # set variables
   user_move = params[:key].to_i
+  @game = session[:game]
+  @board = @game.board
 
-  @board, @human, @computer =
-    session[:board], session[:human], session[:computer]
+  # determine game state and make moves
+  if @game.over?
+    @result = @game.result
+  else
+    if @game.human_turn?
+      @game.human_moves(user_move)
 
-  # need to refactor these checks
-  unless @board[user_move].marker == @human.marker || @board.someone_won? ||
-           @board.full?
-    @board[user_move] = @human.marker
-
-    unless @board.someone_won? || @board.full?
-      @board[@board.unmarked_keys.sample] = @computer.marker
+      @game.computer_moves unless @game.over?
     end
   end
 
-  if @board.someone_won? || @board.full?
-    @result =
-      case @board.winning_marker
-      when @human.marker
-        "#{@human.name} won!"
-      when @computer.marker
-        "#{@computer.name} won!"
-      else
-        "It's a tie!"
-      end
-  end
+  # check again if game is over
+  @result = @game.result if @game.over?
 
   erb :play
 end
 
 get '/new-game' do
-  session[:board] = Board.new
-  session[:human] = Player.new('X', 'Player')
-  session[:computer] = Player.new('O', 'Computer')
+  session[:game].reset
   redirect '/play'
 end
 
