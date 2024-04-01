@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>
+      <%= @page_title%>
+    </title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/main.css" type="text/css">
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/new-game">New Game</a>
+      </nav>
+    </header>
+    <h1>Ultimate Tic Tac Toe</h1>
+    <ul>
+      <% session[:messages].each do |message| %>
+        <li class="flash"><%= message %></li>
+      <% end %>
+    </ul>
+    <% session[:messages].clear %>
+    <main>
+      <%== yield %>
+    </main>
+  </body>
+</html>

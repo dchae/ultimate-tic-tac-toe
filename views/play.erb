@@ -1,0 +1,10 @@
+<% @board.each_row do |row| %>
+  <form class="inline" method="post" action="/play">
+    <% row.each do |key, square| %>
+      <button type="submit" name="key" value="<%= key %>"><%= square.to_s %></button>
+    <% end %>
+  </form>
+<% end %>
+
+<%= @result %>
+<br>
